@@ -22,13 +22,32 @@
                 <h1 class="display-4 text-center mb-3">
                     Weight Converter
                 </h1>
-                <form>
+                <form id="unitForm">
+
+                    <select id="unitSelect" class="form-select mb-3 form-select-lg">
+                        <option selected disabled>Select the unit</option>
+                        <option value="pounds">Pounds</option>
+                        <option value="grams">Grams</option>
+                        <option value="kilograms">Kilograms</option>
+                        <option value="ounces">Ounces</option>
+                    </select>
+
                     <div class="mb-3">
-                        <input id="lbsInput" type="number" class="form-control form-control-lg" placeholder="Enter Pounds....">
+                        <input id="unitInput" type="number" class="form-control form-control-lg" placeholder="Enter Pounds....">
                     </div>
                 </form>
 
                 <div id="output">
+
+                    <div class="card mb-2 bg-info">
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                Pounds:
+                            </h4>
+                            <div id="lbsOutput"></div>
+                        </div>
+                    </div>
+
                     <div class="card mb-2 bg-primary">
                         <div class="card-body">
                             <h4 class="card-title">
@@ -41,7 +60,7 @@
                     <div class="card mb-2 bg-success">
                         <div class="card-body">
                             <h4 class="card-title">
-                                kilograms:
+                                Kilograms:
                             </h4>
                             <div id="kgOutput"></div>
                         </div>
@@ -61,14 +80,112 @@
     </div>
 
     <script>
-        document.querySelector('#output').style.visibility = 'hidden';
-        document.querySelector('#lbsInput').addEventListener('input', function(e){
-            let lbs = e.target.value;
-            document.querySelector('#output').style.visibility = 'visible';
-            document.querySelector('#gramsOutput').innerText = lbs/0.0022046;
-            document.querySelector('#kgOutput').innerText = lbs/2.2046;
-            document.querySelector('#ozOutput').innerText = lbs*16;
+        let unit,grams,kilograms,ounces,pounds,unitId,outputDisplay;
+        const output = document.querySelector("#output");
+        const gramsNode = document.querySelector("#gramsOutput");
+        const kgNode = document.querySelector("#kgOutput");
+        const ozNode = document.querySelector("#ozOutput");
+        const lbsNode = document.querySelector("#lbsOutput");
+        const unitInput = document.querySelector('#unitInput');
+        const unitSelect = document.querySelector('#unitSelect');
+        const cards = document.querySelectorAll('.card');
+
+        output.style.display = 'none';
+
+        // select event
+        unitSelect.addEventListener('change',function () {
+            unit = this.value.toUpperCase();
+            let first = unit.slice(0,1);
+            let rest = unit.toLowerCase();
+            let final = `${first}${rest.slice(1)}`;
+
+            unitInput.placeholder = `Enter ${final}...`;
+            if(unitInput.value){
+                calculate(unitInput.value);
+                displayResult();
+            }
         })
+        
+        // when enter input
+        unitInput.addEventListener('input', function(e){
+            let input = e.target.value;
+            calculate(input);
+            displayResult();
+        })
+
+        // show alert 
+        function showAlert(){
+            const form = document.querySelector('#unitForm');
+            const unitSelect = document.querySelector('#unitSelect');
+            const unselectAlert = document.querySelector('.unselect-alert');
+            const div = document.createElement('div');
+            const text = document.createTextNode('Please select a unit');
+            div.classList = 'alert alert-danger unselect-alert';
+            div.appendChild(text);
+
+            form.insertBefore(div, unitSelect);
+            setTimeout(() => {
+            document.querySelector('.unselect-alert').remove();
+            },3000)
+        }
+
+        // execute function
+        function calculate(input) {
+            switch(unit) {
+                case 'POUNDS': 
+                grams = input/0.0022046;
+                kilograms = input/2.2046;    
+                ounces = input*16;
+                unitId = 'lbsOutput';
+                break;
+
+                case 'GRAMS': 
+                pounds = input * 0.0022046;
+                kilograms = input/ 1000;    
+                ounces = input * 28.35;
+                unitId = 'gramsOutput';
+                break;
+
+                case 'KILOGRAMS': 
+                grams = input * 1000;
+                pounds = input * 2.205;    
+                ounces = input * 35.274;
+                unitId = 'kgOutput';
+                break;
+
+                case 'OUNCES': 
+                grams = input * 28.35;
+                kilograms = input/ 35.274;    
+                pounds = input / 16;
+                unitId = 'ozOutput';
+                break;
+
+                default: showAlert();
+                outputDisplay = 'none';
+                unitInput.value = '';
+            }
+        }
+        function displayResult() {
+            if(outputDisplay){
+                output.style.display = outputDisplay;
+            } else {
+            output.style.display = '';
+            }
+            outputDisplay = undefined;
+
+            for(let i =0; i < cards.length; i++){
+                cards[i].style.display = 'block';
+            }
+
+            gramsNode.innerText = grams;
+            lbsNode.innerText = pounds;
+            kgNode.innerText = kilograms;
+            ozNode.innerText = ounces;
+
+            if(unitId){
+                document.querySelector(`#${unitId}`).parentElement.parentElement.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
